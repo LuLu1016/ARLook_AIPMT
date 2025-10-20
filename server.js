@@ -238,7 +238,19 @@ app.get('/api/appointments', (req, res) => {
 app.post('/api/appointments', (req, res) => {
   try {
     const appointmentsPath = path.join(__dirname, 'data', 'appointments.json');
-    const appointmentsData = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
+    
+    // Ensure data directory exists
+    const dataDir = path.dirname(appointmentsPath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    let appointmentsData;
+    if (fs.existsSync(appointmentsPath)) {
+      appointmentsData = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
+    } else {
+      appointmentsData = { appointments: [] };
+    }
     
     // Generate new appointment ID
     const newId = String(appointmentsData.appointments.length + 1).padStart(3, '0');
@@ -271,7 +283,19 @@ app.post('/api/appointments', (req, res) => {
 app.put('/api/appointments/:id', (req, res) => {
   try {
     const appointmentsPath = path.join(__dirname, 'data', 'appointments.json');
-    const appointmentsData = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
+    
+    // Ensure data directory exists
+    const dataDir = path.dirname(appointmentsPath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    let appointmentsData;
+    if (fs.existsSync(appointmentsPath)) {
+      appointmentsData = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
+    } else {
+      return res.status(404).json({ success: false, error: 'No appointments data found' });
+    }
     
     const appointmentIndex = appointmentsData.appointments.findIndex(apt => apt.id === req.params.id);
     
@@ -308,7 +332,19 @@ app.post('/api/appointments/:id/assign', express.json(), (req, res) => {
     const { arlooker } = req.body;
     
     const appointmentsPath = path.join(__dirname, 'data', 'appointments.json');
-    const appointments = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
+    
+    // Ensure data directory exists
+    const dataDir = path.dirname(appointmentsPath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    let appointments;
+    if (fs.existsSync(appointmentsPath)) {
+      appointments = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
+    } else {
+      return res.status(404).json({ success: false, error: 'No appointments data found' });
+    }
     
     // Find and update the appointment
     const appointmentIndex = appointments.appointments.findIndex(app => app.id === appointmentId);
@@ -335,7 +371,19 @@ app.post('/api/appointments/:id/complete', express.json(), (req, res) => {
     const { video_url, report_data, status } = req.body;
     
     const appointmentsPath = path.join(__dirname, 'data', 'appointments.json');
-    const appointments = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
+    
+    // Ensure data directory exists
+    const dataDir = path.dirname(appointmentsPath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    let appointments;
+    if (fs.existsSync(appointmentsPath)) {
+      appointments = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
+    } else {
+      return res.status(404).json({ success: false, error: 'No appointments data found' });
+    }
     
     const appointmentIndex = appointments.appointments.findIndex(app => app.id === appointmentId);
     if (appointmentIndex !== -1) {
@@ -352,6 +400,39 @@ app.post('/api/appointments/:id/complete', express.json(), (req, res) => {
   } catch (error) {
     console.error('Error completing appointment:', error);
     res.status(500).json({ success: false, error: 'Failed to complete appointment' });
+  }
+});
+
+// Customer login endpoint
+app.post('/api/customer/login', express.json(), (req, res) => {
+  try {
+    const { email, phone } = req.body;
+    const appointmentsPath = path.join(__dirname, 'data', 'appointments.json');
+    
+    // Ensure data directory exists
+    const dataDir = path.dirname(appointmentsPath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    if (fs.existsSync(appointmentsPath)) {
+      const data = fs.readFileSync(appointmentsPath, 'utf8');
+      const appointments = JSON.parse(data);
+      const customerAppointments = appointments.appointments.filter(
+        apt => apt.customer_email === email && apt.customer_phone === phone
+      );
+      
+      if (customerAppointments.length > 0) {
+        res.json({ success: true, appointments: customerAppointments });
+      } else {
+        res.status(404).json({ success: false, error: 'No appointments found for this email and phone.' });
+      }
+    } else {
+      res.status(404).json({ success: false, error: 'No appointments data found.' });
+    }
+  } catch (error) {
+    console.error('Error during customer login:', error);
+    res.status(500).json({ success: false, error: 'Failed to process login.' });
   }
 });
 
