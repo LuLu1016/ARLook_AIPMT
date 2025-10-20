@@ -15,6 +15,13 @@ yarn-error.log*
 uploads/
 test_videos/
 
+# Video files (too large for GitHub)
+*.MOV
+*.mp4
+*.avi
+*.mkv
+*.webm
+
 # Data files (contains sensitive customer data)
 data/
 
