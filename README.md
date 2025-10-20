@@ -12,45 +12,64 @@ An AI-powered apartment inspection platform that helps international students ma
 
 ## Quick Start
 
-### 1. Install Dependencies
+### 🚀 自动安装 (推荐)
 
+**Windows 用户:**
+```bash
+# 双击运行 install.bat 文件
+install.bat
+```
+
+**Mac/Linux 用户:**
+```bash
+# 运行安装脚本
+chmod +x install.sh
+./install.sh
+```
+
+### 📋 手动安装
+
+#### 1. 克隆项目
+```bash
+git clone https://github.com/LuLu1016/ARLook_AIPMT.git
+cd ARLook_AIPMT
+```
+
+#### 2. 安装依赖
 ```bash
 npm install
 ```
 
-### 2. Configure OpenAI API Key
-
-Create a `.env` file in the project root:
-
+#### 3. 配置环境变量
+创建 `.env` 文件：
 ```bash
-# Copy the example file
-cp .env.example .env
-
-# Edit .env and add your OpenAI API key
-OPENAI_API_KEY=sk-your-actual-openai-api-key-here
+# 创建环境变量文件
+echo "OPENAI_API_KEY=your_openai_api_key_here" > .env
+echo "NODE_ENV=development" >> .env
+echo "PORT=3000" >> .env
 ```
 
-**To get an OpenAI API key:**
-1. Go to [OpenAI Platform](https://platform.openai.com/)
-2. Sign up or log in
-3. Navigate to API Keys section
-4. Create a new API key
-5. Copy the key and paste it in your `.env` file
+**获取 OpenAI API Key:**
+1. 访问 [OpenAI Platform](https://platform.openai.com/)
+2. 注册或登录
+3. 进入 API Keys 部分
+4. 创建新的 API Key
+5. 复制密钥并粘贴到 `.env` 文件中
 
-### 3. Start the Server
-
+#### 4. 启动服务器
 ```bash
 npm start
 ```
 
-The server will start on `http://localhost:3000`
+服务器将在 `http://localhost:3000` 启动
 
-### 4. Use the Application
-
-1. Open your browser and go to `http://localhost:3000`
-2. Upload a video of an apartment tour
-3. Click "Analyze Video"
-4. View the AI-generated inspection report
+#### 5. 使用应用
+1. 打开浏览器访问 `http://localhost:3000`
+2. 选择您的角色：
+   - **客户** - 预约看房
+   - **ARLooker** - 上传视频
+   - **管理员** - 管理预约 (密码: `admin2024`)
+3. 按照界面提示操作
 
 ## API Endpoints
 
@@ -96,16 +115,32 @@ npm start
 ## Project Structure
 
 ```
-ARLook/
-├── server.js          # Express server with AI integration
-├── package.json       # Dependencies and scripts
-├── .env               # Environment variables (create this)
-├── .env.example       # Environment variables template
-├── public/            # Frontend files
-│   ├── index.html    # Main application page
-│   ├── style.css     # Styling
-│   └── script.js     # Frontend JavaScript
-└── uploads/           # Temporary file storage
+ARLook_AIPMT/
+├── server.js                    # Express server with AI integration
+├── package.json                 # Dependencies and scripts
+├── .env                         # Environment variables (create this)
+├── install.sh                   # Mac/Linux 安装脚本
+├── install.bat                  # Windows 安装脚本
+├── LOCAL_SETUP_GUIDE.md         # 详细本地部署指南
+├── public/                      # Frontend files
+│   ├── index.html              # 主页 - 角色选择
+│   ├── customer/               # 客户页面
+│   │   ├── schedule.html       # 预约表单
+│   │   ├── confirmation.html  # 确认页面
+│   │   ├── login.html         # 客户登录
+│   │   └── dashboard.html     # 客户仪表板
+│   ├── admin/                  # 管理员页面
+│   │   ├── admin.html         # 管理员仪表板
+│   │   ├── admin.js           # 管理员逻辑
+│   │   └── admin.css          # 管理员样式
+│   └── arlooker/              # ARLooker 页面
+│       ├── dashboard.html     # ARLooker 仪表板
+│       ├── dashboard.js       # ARLooker 逻辑
+│       └── upload.html        # 视频上传页面
+├── data/                       # 数据存储
+│   └── appointments.json      # 预约数据
+├── uploads/                    # 上传文件存储
+└── test_videos/               # 测试视频
 ```
 
 ## Technologies Used
