@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Apartment Tour - ARLook</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 30px 20px;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9,22 9,12 15,12 15,22"/>
+                </svg>
+                <h1>ARLook</h1>
+            </div>
+            <p class="subtitle">Schedule Your Apartment Tour</p>
+        </header>
+
+        <a href="../index.html" class="back-btn">← Back to Home</a>
+
+        <div class="form-container">
+            <h2 class="form-title">Book Your Apartment Inspection</h2>
+            
+            <form id="scheduleForm">
+                <!-- Customer Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                            <line x1="20" y1="8" x2="20" y2="14"/>
+                            <line x1="23" y1="11" x2="17" y2="11"/>
+                        </svg>
+                        Customer Information
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customer_name">Full Name <span class="required">*</span></label>
+                            <input type="text" id="customer_name" name="customer_name" required placeholder="Enter your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_email">Email Address <span class="required">*</span></label>
+                            <input type="email" id="customer_email" name="customer_email" required placeholder="your.email@university.edu">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customer_phone">Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="customer_phone" name="customer_phone" required placeholder="(555) 123-4567">
+                    </div>
+                </div>
+
+                <!-- Apartment Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9,22 9,12 15,12 15,22"/>
+                        </svg>
+                        Apartment Information
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="apartment_name">Apartment Complex Name <span class="required">*</span></label>
+                            <input type="text" id="apartment_name" name="apartment_name" required placeholder="e.g., Evo, The Radian, 2116 Chestnut">
+                        </div>
+                        <div class="form-group">
+                            <label for="preferred_date">Preferred Date <span class="required">*</span></label>
+                            <input type="date" id="preferred_date" name="preferred_date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="apartment_address">Full Address <span class="required">*</span></label>
+                        <input type="text" id="apartment_address" name="apartment_address" required placeholder="e.g., 123 Market St, Philadelphia, PA 19104">
+                    </div>
+                </div>
+
+                <!-- Key Concerns Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        What are your main concerns? <span class="required">*</span>
+                    </h3>
+                    <p style="color: #666; margin-bottom: 20px;">Select all that apply - this helps our ARLookers focus on what matters most to you.</p>
+                    
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="cleanliness" name="key_concerns" value="cleanliness">
+                            <label for="cleanliness">🧹 Cleanliness & Hygiene</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="noise" name="key_concerns" value="noise">
+                            <label for="noise">🔇 Noise Levels</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="safety" name="key_concerns" value="safety">
+                            <label for="safety">🛡️ Safety & Security</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="appliances" name="key_concerns" value="appliances">
+                            <label for="appliances">🔌 Appliances & Utilities</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="natural_light" name="key_concerns" value="natural_light">
+                            <label for="natural_light">☀️ Natural Light & Windows</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                        Additional Information
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="additional_info">Special Requests or Additional Notes</label>
+                        <textarea id="additional_info" name="additional_info" placeholder="Any specific areas you'd like us to focus on during the inspection, accessibility needs, or other important details..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🎯 Schedule My Apartment Tour
+                </button>
+
+                <div id="statusMessage" class="status-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Set minimum date to today
+        document.getElementById('preferred_date').min = new Date().toISOString().split('T')[0];
+
+        // Generate unique customer ID
+        function getCustomerId() {
+            let customerId = localStorage.getItem('customerId');
+            if (!customerId) {
+                customerId = 'cust_' + Date.now();
+                localStorage.setItem('customerId', customerId);
+            }
+            return customerId;
+        }
+
+        // Form submission
+        document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // Validate required checkboxes
+            const checkedConcerns = document.querySelectorAll('input[name="key_concerns"]:checked');
+            if (checkedConcerns.length === 0) {
+                showStatus('Please select at least one concern area.', 'error');
+                return;
+            }
+            
+            // Disable submit button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span>Scheduling...';
+            
+            try {
+                // Collect form data
+                const formData = new FormData(e.target);
+                const concerns = Array.from(checkedConcerns).map(cb => cb.value);
+                
+                const appointmentData = {
+                    customer_id: getCustomerId(), // Include customer ID
+                    customer_name: formData.get('customer_name'),
+                    customer_email: formData.get('customer_email'),
+                    customer_phone: formData.get('customer_phone'),
+                    apartment_name: formData.get('apartment_name'),
+                    apartment_address: formData.get('apartment_address'),
+                    preferred_date: formData.get('preferred_date'),
+                    key_concerns: concerns,
+                    additional_info: formData.get('additional_info') || '',
+                    status: 'scheduled',
+                    created_at: new Date().toISOString()
+                };
+
+                console.log('Submitting appointment data:', appointmentData);
+
+                // Submit to API
+                const response = await fetch('/api/appointments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(appointmentData)
+                });
+
+                const result = await response.json();
+                console.log('API response:', result);
+
+                if (result.success) {
+                    showStatus(`✅ Tour scheduled successfully! Your appointment ID is ${result.appointmentId}. We'll contact you soon to confirm the details.`, 'success');
+                    
+                    // Store appointment data for confirmation page
+                    const confirmationData = {
+                        id: result.appointmentId,
+                        ...appointmentData
+                    };
+                    localStorage.setItem('lastAppointment', JSON.stringify(confirmationData));
+                    
+                    // Redirect to confirmation page after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = `confirmation.html?id=${result.appointmentId}`;
+                    }, 3000);
+                } else {
+                    throw new Error(result.error || 'Failed to schedule appointment');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '🎯 Schedule My Apartment Tour';
+            }
+        });
+
+        function showStatus(message, type) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.style.display = 'block';
+            
+            // Scroll to message
+            statusMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Add some form validation feedback
+        document.querySelectorAll('input[required], textarea[required]').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (!this.value.trim()) {
+                    this.style.borderColor = '#dc3545';
+                } else {
+                    this.style.borderColor = '#e1e5e9';
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.style.borderColor = '#e1e5e9';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

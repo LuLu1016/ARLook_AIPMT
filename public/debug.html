@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARLook - Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background: #e9ecef;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 ARLook Debug Test</h1>
+        
+        <div>
+            <h3>1. API Health Check</h3>
+            <button onclick="testHealth()">Test API Health</button>
+            <div id="healthResult" class="status"></div>
+        </div>
+
+        <div>
+            <h3>2. Test Videos Check</h3>
+            <button onclick="testVideos()">Check Test Videos</button>
+            <div id="videosResult" class="status"></div>
+        </div>
+
+        <div>
+            <h3>3. File Upload Test</h3>
+            <input type="file" id="fileInput" accept="video/*">
+            <button onclick="testUpload()" id="uploadBtn" disabled>Test Upload</button>
+            <div id="uploadResult" class="status"></div>
+        </div>
+
+        <div>
+            <h3>4. Test Mode Analysis</h3>
+            <button onclick="testAnalysis()">Test Evo Video Analysis</button>
+            <div id="analysisResult" class="status"></div>
+        </div>
+
+        <div>
+            <h3>📋 Debug Log</h3>
+            <div id="debugLog" class="log"></div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        // Enable upload button when file is selected
+        fileInput.addEventListener('change', (e) => {
+            uploadBtn.disabled = !e.target.files[0];
+            log('File selected: ' + (e.target.files[0] ? e.target.files[0].name : 'none'));
+        });
+
+        function log(message) {
+            const logDiv = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+
+        async function testHealth() {
+            log('Testing API health...');
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                document.getElementById('healthResult').innerHTML = 
+                    `<strong>✅ API Healthy:</strong><br>Status: ${data.status}<br>OpenAI: ${data.openai_configured ? 'Configured' : 'Not Configured'}`;
+                log('Health check successful: ' + JSON.stringify(data));
+            } catch (error) {
+                document.getElementById('healthResult').innerHTML = 
+                    `<strong>❌ API Error:</strong> ${error.message}`;
+                log('Health check failed: ' + error.message);
+            }
+        }
+
+        async function testVideos() {
+            log('Checking test videos...');
+            try {
+                const response = await fetch('/api/test-videos');
+                const data = await response.json();
+                document.getElementById('videosResult').innerHTML = 
+                    `<strong>📹 Test Videos:</strong><br>${data.videos.length} videos found:<br>${data.videos.map(v => `• ${v}`).join('<br>')}`;
+                log('Test videos check successful: ' + JSON.stringify(data));
+            } catch (error) {
+                document.getElementById('videosResult').innerHTML = 
+                    `<strong>❌ Videos Error:</strong> ${error.message}`;
+                log('Test videos check failed: ' + error.message);
+            }
+        }
+
+        async function testUpload() {
+            const file = fileInput.files[0];
+            if (!file) {
+                log('No file selected for upload test');
+                return;
+            }
+
+            log(`Testing upload with file: ${file.name} (${file.size} bytes)`);
+            
+            try {
+                const formData = new FormData();
+                formData.append('video', file);
+
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('uploadResult').innerHTML = 
+                        `<strong>✅ Upload Success:</strong><br>Rating: ${data.report.rating}/5<br>Frames: ${data.analysisInfo.framesAnalyzed}`;
+                    log('Upload test successful: ' + JSON.stringify(data.report));
+                } else {
+                    document.getElementById('uploadResult').innerHTML = 
+                        `<strong>❌ Upload Failed:</strong> ${data.error}`;
+                    log('Upload test failed: ' + data.error);
+                }
+            } catch (error) {
+                document.getElementById('uploadResult').innerHTML = 
+                    `<strong>❌ Upload Error:</strong> ${error.message}`;
+                log('Upload test error: ' + error.message);
+            }
+        }
+
+        async function testAnalysis() {
+            log('Testing Evo video analysis...');
+            try {
+                const response = await fetch('/api/test-analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ videoFile: 'evo_room.MOV' })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('analysisResult').innerHTML = 
+                        `<strong>✅ Analysis Success:</strong><br>Rating: ${data.report.rating}/5<br>Summary: ${data.report.summary.substring(0, 100)}...`;
+                    log('Analysis test successful: ' + JSON.stringify(data.report));
+                } else {
+                    document.getElementById('analysisResult').innerHTML = 
+                        `<strong>❌ Analysis Failed:</strong> ${data.error}`;
+                    log('Analysis test failed: ' + data.error);
+                }
+            } catch (error) {
+                document.getElementById('analysisResult').innerHTML = 
+                    `<strong>❌ Analysis Error:</strong> ${error.message}`;
+                log('Analysis test error: ' + error.message);
+            }
+        }
+
+        // Auto-run health check on page load
+        window.addEventListener('load', () => {
+            log('Debug page loaded');
+            testHealth();
+        });
+    </script>
+</body>
+</html>

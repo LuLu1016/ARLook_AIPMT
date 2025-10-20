@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARLook - Apartment Inspector (Fixed)</title>
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9,22 9,12 15,12 15,22"/>
+                    </svg>
+                </div>
+                <h1>ARLook</h1>
+                <p>AI-Powered Apartment Inspector for International Students</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-card">
+                    <div class="upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                            <circle cx="12" cy="13" r="3"/>
+                        </svg>
+                    </div>
+                    <h2>Upload Your Apartment Video</h2>
+                    <p>Record a tour of your apartment and get an instant AI-powered inspection report</p>
+                    
+                    <form id="uploadForm" class="upload-form">
+                        <!-- Test Mode Toggle -->
+                        <div class="test-mode-toggle">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="testModeToggle">
+                                <span class="slider"></span>
+                                <span class="toggle-label">Test Mode (Use Pre-uploaded Videos)</span>
+                            </label>
+                        </div>
+
+                        <!-- Test Video Selection -->
+                        <div class="test-video-selection" id="testVideoSelection" style="display: none;">
+                            <label for="testVideoSelect">Select Test Video:</label>
+                            <select id="testVideoSelect" class="test-video-dropdown">
+                                <option value="">Loading test videos...</option>
+                            </select>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="file-input-wrapper" id="fileInputWrapper">
+                            <input type="file" id="videoInput" name="video" accept=".mp4,.mov,.avi,.mkv,.webm" required>
+                            <label for="videoInput" class="file-input-label">
+                                <div class="upload-icon-large">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7,10 12,15 17,10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </div>
+                                <span class="file-text">Choose Video File</span>
+                                <span class="file-hint">MP4, MOV, AVI, MKV, WEBM (Max 500MB)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="selected-file" id="selectedFile" style="display: none;">
+                            <div class="file-info">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                                    <circle cx="12" cy="13" r="3"/>
+                                </svg>
+                                <span class="file-name" id="fileName"></span>
+                            </div>
+                            <button type="button" class="remove-file" id="removeFile">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <button type="button" class="analyze-btn" id="analyzeBtn" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                            </svg>
+                            Analyze Video
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Loading Section -->
+            <section class="loading-section" id="loadingSection" style="display: none;">
+                <div class="loading-card">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                    </div>
+                    <h2>Analyzing Your Apartment</h2>
+                    <p>Our AI is examining your video to provide a detailed inspection report...</p>
+                    <div class="loading-steps">
+                        <div class="step active">
+                            <div class="step-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                                    <circle cx="12" cy="13" r="3"/>
+                                </svg>
+                            </div>
+                            <span>Processing Video</span>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4m0-7h10a2 2 0 0 1 2 2v3c0 1.1-.9 2-2 2H9m0-7V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </div>
+                            <span>Extracting Key Frames</span>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                </svg>
+                            </div>
+                            <span>AI Analysis</span>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <span>Generating Report</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2>Inspection Report</h2>
+                    <div class="results-actions">
+                        <button class="back-home-btn" id="backHomeBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                <polyline points="9,22 9,12 15,12 15,22"/>
+                            </svg>
+                            Back to Home
+                        </button>
+                        <button class="new-analysis-btn" id="newAnalysisBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Analyze Another Video
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="report-container">
+                    <!-- Overall Rating -->
+                    <div class="rating-card">
+                        <h3>Overall Rating</h3>
+                        <div class="rating-display">
+                            <div class="rating-score" id="overallRating"></div>
+                            <div class="rating-stars" id="ratingStars"></div>
+                        </div>
+                    </div>
+
+                    <!-- Report Details -->
+                    <div class="report-grid">
+                        <div class="report-card">
+                            <div class="card-header">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                    <polyline points="9,22 9,12 15,12 15,22"/>
+                                </svg>
+                                <h4>Layout & Space</h4>
+                            </div>
+                            <div class="card-content" id="layoutContent"></div>
+                        </div>
+
+                        <div class="report-card">
+                            <div class="card-header">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4m0-7h10a2 2 0 0 1 2 2v3c0 1.1-.9 2-2 2H9m0-7V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                                <h4>Facilities & Amenities</h4>
+                            </div>
+                            <div class="card-content" id="facilitiesContent"></div>
+                        </div>
+
+                        <div class="report-card">
+                            <div class="card-header">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                </svg>
+                                <h4>Issues & Concerns</h4>
+                            </div>
+                            <div class="card-content" id="issuesContent"></div>
+                        </div>
+
+                        <div class="report-card">
+                            <div class="card-header">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                                <h4>Safety & Security</h4>
+                            </div>
+                            <div class="card-content" id="safetyContent"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section class="error-section" id="errorSection" style="display: none;">
+                <div class="error-card">
+                    <div class="error-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                    </div>
+                    <h2>Analysis Failed</h2>
+                    <p id="errorMessage">Something went wrong during the analysis. Please try again.</p>
+                    <button class="retry-btn" id="retryBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,4 23,10 17,10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                        Try Again
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2024 ARLook. Helping international students make informed rental decisions.</p>
+        </footer>
+    </div>
+
+    <script src="script.js?v=2"></script>
+</body>
+</html>

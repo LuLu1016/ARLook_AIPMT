@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARLook - Evo Video Test</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #5a6fd8;
+            background: #f0f2ff;
+        }
+        .upload-area.dragover {
+            border-color: #5a6fd8;
+            background: #f0f2ff;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .file-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 10px;
+            border: 2px solid #4caf50;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        .rating-card {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .rating-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .report-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .report-card h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        .report-card ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 ARLook - Evo Apartment Test</h1>
+        <p class="subtitle">Upload your Evo apartment video for AI analysis</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <h3>📹 Upload Your Evo Video</h3>
+            <p>Supported formats: MP4, MOV, AVI, MKV, WEBM</p>
+            <p><strong>Maximum size: 500MB</strong></p>
+            
+            <input type="file" id="videoInput" accept="video/*" />
+            <br>
+            <button id="analyzeBtn" disabled>🔍 Analyze Apartment</button>
+        </div>
+
+        <div id="fileInfo" class="file-info" style="display: none;">
+            <strong>Selected file:</strong> <span id="fileName"></span><br>
+            <strong>Size:</strong> <span id="fileSize"></span>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div id="results" class="results">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>📊 Analysis Results</h2>
+                <button onclick="backToHome()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    🏠 Back to Home
+                </button>
+            </div>
+            <div id="reportContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const videoInput = document.getElementById('videoInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        const reportContent = document.getElementById('reportContent');
+        const uploadArea = document.getElementById('uploadArea');
+
+        let currentFile = null;
+
+        // File input change
+        videoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileSelect(file);
+            }
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // Analyze button click
+        analyzeBtn.addEventListener('click', async () => {
+            if (!currentFile) return;
+
+            showStatus('Uploading and analyzing video...', 'loading');
+            analyzeBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('video', currentFile);
+
+                console.log('Sending video for analysis...', {
+                    filename: currentFile.name,
+                    size: currentFile.size,
+                    type: currentFile.type
+                });
+
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                console.log('Analysis response:', result);
+
+                if (result.success) {
+                    showStatus('Analysis completed successfully!', 'success');
+                    displayResults(result.report);
+                } else {
+                    showStatus(`Error: ${result.error}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('Network error. Please try again.', 'error');
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        function handleFileSelect(file) {
+            // Validate file type
+            const allowedTypes = ['video/mp4', 'video/mov', 'video/avi', 'video/mkv', 'video/webm'];
+            const allowedExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm'];
+            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+            
+            if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+                showStatus('Please select a valid video file (MP4, MOV, AVI, MKV, WEBM).', 'error');
+                return;
+            }
+
+            // Validate file size (500MB limit)
+            const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+            if (file.size > maxSize) {
+                showStatus('File size must be less than 500MB.', 'error');
+                return;
+            }
+
+            currentFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.style.display = 'block';
+            analyzeBtn.disabled = false;
+            hideStatus();
+            results.style.display = 'none';
+        }
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        function hideStatus() {
+            status.style.display = 'none';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function displayResults(report) {
+            results.style.display = 'block';
+            
+            reportContent.innerHTML = `
+                <div class="rating-card">
+                    <div class="rating-score">${report.rating}/5</div>
+                    <h3>Overall Rating</h3>
+                    <p><strong>Summary:</strong> ${report.summary}</p>
+                </div>
+                
+                <div class="report-grid">
+                    <div class="report-card">
+                        <h4>🏠 Layout & Space</h4>
+                        <p>${report.layout}</p>
+                    </div>
+                    
+                    <div class="report-card">
+                        <h4>🔧 Facilities & Amenities</h4>
+                        <ul>
+                            ${Array.isArray(report.facilities) ? 
+                                report.facilities.map(item => `<li>${item}</li>`).join('') : 
+                                `<li>${report.facilities}</li>`
+                            }
+                        </ul>
+                    </div>
+                    
+                    <div class="report-card">
+                        <h4>⚠️ Issues & Concerns</h4>
+                        <p>${report.issues}</p>
+                    </div>
+                    
+                    <div class="report-card">
+                        <h4>🛡️ Safety & Security</h4>
+                        <p>${report.safety}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function backToHome() {
+            // Reset everything
+            currentFile = null;
+            videoInput.value = '';
+            analyzeBtn.disabled = true;
+            fileInfo.style.display = 'none';
+            results.style.display = 'none';
+            hideStatus();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize
+        console.log('ARLook test page loaded');
+    </script>
+</body>
+</html>

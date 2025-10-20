@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Inspection Video - ARLook</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .appointment-info {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .appointment-id {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .status-badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-scheduled {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-in-progress {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .appointment-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .detail-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .detail-group h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-group p {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .upload-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .upload-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #333;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #5a6fd8;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #5a6fd8;
+            background: #f0f2ff;
+        }
+
+        .upload-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .upload-icon svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .upload-hint {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .file-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 10px;
+            border: 2px solid #4caf50;
+            display: none;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .analyze-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .appointment-details {
+                grid-template-columns: 1fr;
+            }
+
+            .upload-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                    <circle cx="12" cy="13" r="3"/>
+                </svg>
+                <h1>ARLook</h1>
+            </div>
+            <p class="subtitle">Upload Inspection Video</p>
+        </header>
+
+        <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+
+        <div id="appointmentInfo" class="appointment-info" style="display: none;">
+            <div class="appointment-header">
+                <div class="appointment-id" id="appointmentId">#001</div>
+                <span class="status-badge status-scheduled" id="appointmentStatus">Scheduled</span>
+            </div>
+            
+            <div class="appointment-details">
+                <div class="detail-group">
+                    <h4>Customer</h4>
+                    <p id="customerName">John Doe</p>
+                </div>
+                <div class="detail-group">
+                    <h4>Apartment</h4>
+                    <p id="apartmentName">Evo</p>
+                </div>
+                <div class="detail-group">
+                    <h4>Date</h4>
+                    <p id="appointmentDate">January 15, 2024</p>
+                </div>
+                <div class="detail-group">
+                    <h4>Phone</h4>
+                    <p id="customerPhone">123-456-7890</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-container">
+            <h2 class="upload-title">Upload Inspection Video</h2>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </div>
+                <div class="upload-text">Choose Video File</div>
+                <div class="upload-hint">MP4, MOV, AVI, MKV, WEBM (Max 500MB)</div>
+                
+                <input type="file" id="videoInput" accept="video/*">
+            </div>
+
+            <div id="fileInfo" class="file-info">
+                <strong>Selected file:</strong> <span id="fileName"></span><br>
+                <strong>Size:</strong> <span id="fileSize"></span>
+            </div>
+
+            <button id="analyzeBtn" class="analyze-btn" disabled>🔍 Analyze Video</button>
+
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentAppointment = null;
+        let currentFile = null;
+
+        // Get appointment ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const appointmentId = urlParams.get('appointment');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (appointmentId) {
+                loadAppointmentInfo(appointmentId);
+            }
+            
+            bindEvents();
+        });
+
+        function bindEvents() {
+            const videoInput = document.getElementById('videoInput');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const uploadArea = document.getElementById('uploadArea');
+
+            // File input change
+            videoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFileSelect(file);
+                }
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            // Analyze button click
+            analyzeBtn.addEventListener('click', async () => {
+                if (!currentFile || !currentAppointment) return;
+
+                showStatus('Uploading and analyzing video...', 'loading');
+                analyzeBtn.disabled = true;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('video', currentFile);
+                    formData.append('appointmentId', currentAppointment.id);
+
+                    const response = await fetch('/api/analyze', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showStatus('Analysis completed successfully!', 'success');
+                        
+                        // Update appointment status
+                        await updateAppointmentStatus(currentAppointment.id, 'completed', result.report);
+                        
+                        // Redirect to dashboard after 3 seconds
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 3000);
+                    } else {
+                        showStatus(`Error: ${result.error}`, 'error');
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    showStatus('Network error. Please try again.', 'error');
+                } finally {
+                    analyzeBtn.disabled = false;
+                }
+            });
+        }
+
+        async function loadAppointmentInfo(appointmentId) {
+            try {
+                const response = await fetch('/api/appointments');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const appointment = data.appointments.find(apt => apt.id === appointmentId);
+                    if (appointment) {
+                        currentAppointment = appointment;
+                        displayAppointmentInfo(appointment);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading appointment:', error);
+            }
+        }
+
+        function displayAppointmentInfo(appointment) {
+            document.getElementById('appointmentId').textContent = `#${appointment.id}`;
+            document.getElementById('appointmentStatus').textContent = appointment.status;
+            document.getElementById('appointmentStatus').className = `status-badge status-${appointment.status}`;
+            document.getElementById('customerName').textContent = appointment.customer_name;
+            document.getElementById('apartmentName').textContent = appointment.apartment_name;
+            document.getElementById('appointmentDate').textContent = new Date(appointment.preferred_date).toLocaleDateString();
+            document.getElementById('customerPhone').textContent = appointment.customer_phone;
+            
+            document.getElementById('appointmentInfo').style.display = 'block';
+        }
+
+        function handleFileSelect(file) {
+            // Validate file type
+            const allowedTypes = ['video/mp4', 'video/mov', 'video/avi', 'video/mkv', 'video/webm'];
+            const allowedExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm'];
+            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+            
+            if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+                showStatus('Please select a valid video file (MP4, MOV, AVI, MKV, WEBM).', 'error');
+                return;
+            }
+
+            // Validate file size (500MB limit)
+            const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+            if (file.size > maxSize) {
+                showStatus('File size must be less than 500MB.', 'error');
+                return;
+            }
+
+            currentFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').style.display = 'block';
+            document.getElementById('analyzeBtn').disabled = false;
+            hideStatus();
+        }
+
+        function showStatus(message, type) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.style.display = 'block';
+        }
+
+        function hideStatus() {
+            document.getElementById('statusMessage').style.display = 'none';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        async function updateAppointmentStatus(appointmentId, status, report = null) {
+            try {
+                const updateData = {
+                    status: status,
+                    video_url: `/uploads/video-${Date.now()}-${Math.floor(Math.random() * 1000000000)}.mp4`,
+                    report_data: report,
+                    completed_at: new Date().toISOString()
+                };
+
+                const response = await fetch(`/api/appointments/${appointmentId}/complete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                const result = await response.json();
+                return result.success;
+            } catch (error) {
+                console.error('Error updating appointment status:', error);
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>

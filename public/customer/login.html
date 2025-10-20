@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login - ARLook</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo">
+                <h1>🏠 ARLook</h1>
+                <p>Check Your Tour Status</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <form id="customerLoginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required 
+                           placeholder="Enter your email address">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required 
+                           placeholder="Enter your phone number">
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    🔍 Check My Tours
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Loading your tours...</p>
+            </div>
+
+            <div class="back-link">
+                <a href="../index.html">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('customerLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Show loading state
+            loginBtn.disabled = true;
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            try {
+                // Fetch all appointments
+                const response = await fetch('/api/appointments');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Find appointments matching email and phone
+                    const customerAppointments = data.appointments.filter(apt => 
+                        apt.customer_email.toLowerCase() === email.toLowerCase() &&
+                        apt.customer_phone === phone
+                    );
+                    
+                    if (customerAppointments.length > 0) {
+                        // Store appointments in localStorage and redirect
+                        localStorage.setItem('customerAppointments', JSON.stringify(customerAppointments));
+                        localStorage.setItem('customerEmail', email);
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        throw new Error('No tours found for this email and phone combination. Please check your information.');
+                    }
+                } else {
+                    throw new Error('Failed to load appointments. Please try again.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            } finally {
+                loginBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
