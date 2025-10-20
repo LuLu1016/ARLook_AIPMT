@@ -212,11 +212,26 @@ app.get('/api/arlookers', (req, res) => {
 app.get('/api/appointments', (req, res) => {
   try {
     const appointmentsPath = path.join(__dirname, 'data', 'appointments.json');
-    const appointmentsData = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
-    res.json({ success: true, appointments: appointmentsData.appointments });
+    
+    // Ensure data directory exists
+    const dataDir = path.dirname(appointmentsPath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    if (fs.existsSync(appointmentsPath)) {
+      const appointmentsData = JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'));
+      res.json({ success: true, appointments: appointmentsData.appointments || [] });
+    } else {
+      // Create empty appointments file if it doesn't exist
+      const emptyData = { appointments: [] };
+      fs.writeFileSync(appointmentsPath, JSON.stringify(emptyData, null, 2));
+      res.json({ success: true, appointments: [] });
+    }
   } catch (error) {
     console.error('Error reading appointments:', error);
-    res.status(500).json({ success: false, error: 'Failed to read appointments' });
+    // Return empty array instead of error for better UX
+    res.json({ success: true, appointments: [] });
   }
 });
 
